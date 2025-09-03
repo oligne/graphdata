@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Graphique 3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="control-panel">
+    <div class="slider-container">
+      <div id="sliderValue" class="slider-value">30%</div>
+      <input type="range" id="dataRange" min="10" max="100" value="10" step="10" class="slider">
+    </div>
+    <div class="toggle-group">
+      <span class="toggle-label" id="toggleModeLabel">ROTATION AUTO.</span>
+      <div class="toggle-switch" id="toggleSwitch">
+        <div class="toggle-knob"></div>
+      </div>
+      <span class="toggle-label">SOURIS</span>
+    </div>
+  </div>
+  <div id="3d-graph"></div>
+  <div id="node-tooltip"></div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Graphique 3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+
+
+
+<!-- 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graphique 3D</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #3d-graph {
+      width: 100%;
+      height: 100%;
+    }
+
+
+.control-panel {
+  position: absolute;
+  top: 0px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  background: transparent;
+  padding: 40px;
+  font-family: 'Arial', sans-serif;
+}
+
+.slider-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 32px;
+  height: 0px;
+}
+
+.slider-value {
+  position: absolute;
+  top: -28px;
+  pointer-events: none;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  transition: left 0.1s;
+}
+
+.slider {
+  width: 180px;
+  accent-color: #111;
+}
+
+.toggle-group {
+  position: relative;
+  left: -90px; 
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.toggle-label {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #fff; /* blanc */
+}
+
+.toggle-switch {
+  width: 48px;
+  height: 24px;
+  background: #eee;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  margin: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-knob {
+  width: 20px;
+  height: 20px;
+  background: #000000;
+  border-radius: 50%;
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  transition: left 0.2s;
+}
+
+.toggle-switch.active .toggle-knob {
+  left: 26px;
+  background: #ffffff;
+}
+
+.toggle-mode {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+</style> -->
+<!-- 
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph"></script>
+ 
+
+</head> -->
+<!-- 
+<body>
+
+<div class="control-panel">
+  <div class="slider-container">
+    <div id="sliderValue" class="slider-value">30%</div>
+    <input type="range" id="dataRange" min="10" max="100" value="10" step="10" class="slider">
+  </div>
+  <div class="toggle-group">
+    <span class="toggle-label" id="toggleModeLabel">ROTATION AUTO.</span>
+    <div class="toggle-switch" id="toggleSwitch">
+      <div class="toggle-knob"></div>
+    </div>
+    <span class="toggle-label">SOURIS</span>
+  </div>
+</div> -->
+
+ <!-- Conteneur du graph  -->
+  <!-- <div id="3d-graph"></div> -->
+  <!-- <div id="node-tooltip" style="position:absolute; display:none; background:#222; color:#fff; padding:8px; border-radius:4px; pointer-events:none; font-family:monospace; z-index:1000; white-space:pre; overflow-x:auto;"></div> -->
+
+  <script> 
+
+
+    //const slider = document.getElementById('dataRange');
+    //const percentageDisplay = document.getElementById('dataPercentage');
+    const elem = document.getElementById('3d-graph'); 
+    let fullGraph = null;
+    let graph = null;
+
+    // Charger les données JSON
+  //   fetch('data.json')
+    
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       fullGraph = data;
+  //       graph = ForceGraph3D()(elem)
+  //         .backgroundColor('#1c1919')
+  //         .nodeColor('Extension')
+  //         .onNodeClick(node => {
+  //         // Aim at node from outside it
+  //         const distance = 40;
+  //         const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+
+  //         const newPos = node.x || node.y || node.z
+  //           ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
+  //           : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
+
+  //         graph.cameraPosition(
+  //           newPos, // new position
+  //           node, // lookAt ({ x, y, z })
+  //           3000  // ms transition duration
+            
+  //         )})
+  // .d3AlphaDecay(0.1)
+  // .d3VelocityDecay(0.4)
+  // .linkWidth(0.8)
+  // .linkOpacity(0.8);
+
+ 
+  
+
+
+
+  
+//   graph.onNodeHover(node => {
+//     if (node) {
+//       tooltip.style.display = 'block';
+//       const rawPath = node.attributes?.Chemin_x || '';
+//       const simplePath = simplifyPath(rawPath);
+//       const dossier = node.attributes?.Dossier || '';
+//       const date = node.attributes?.["Date de Creation"] || '';
+//       const info =
+//         `${node.id}\nType: ${node.type || ''}\nChemin: ${simplePath}\nDossier: ${dossier}\nDate: ${date}`;
+//       typeWriter(info);
+//     } else {
+//       tooltip.style.display = 'none';
+//       tooltip.textContent = '';
+//     }
+//   });
+
+//   updateGraph();
+// })
+      // .catch(error => console.error('Erreur lors du chargement du fichier JSON :', error));
+
+
+    // let nodes = [];
+    // let links = [];
+    
+  
+
+    // function updateGraph() {
+      // if (!fullGraph) return;
+
+      // const excludedWords = ["fluid", "config", "cache", "twitter", "venv"]; 
+
+      // const sampleSize = slider.value / 100; // Convertit en fraction (ex: 20% => 0.2)
+      // sliderValue.textContent = `${slider.value}%`;
+
+      // // Mélange les nœuds et en sélectionne un pourcentage
+      // const filteredNodes = fullGraph.nodes
+      //   .filter(node => node.type && node.type.toLowerCase() === "fichier")
+      //   .sort(() => 0.01 - Math.random()) // Mélange aléatoire
+      //   .slice(0, Math.ceil(fullGraph.nodes.length * sampleSize))
+      //   .filter(node => !excludedWords.some(word => node.id.toLowerCase().includes(word))); // Exclut certains mots
+
+                   // // const filteredLinks = fullGraph.links.filter(link =>
+                    // //     filteredNodes.some(node => node.id === link.source) &&
+                    // //     filteredNodes.some(node => node.id === link.target)
+                    // //   );
+
+      // const folderToFiles = {};
+      //   filteredNodes.forEach(node => {
+      //     let chemin = node.attributes?.Chemin_x || '';
+      //     let parts = chemin.split('/');
+      //     let dossierCommun = '';
+      //     for (let depth = parts.length - 2; depth >= 0; depth--) {
+      //       let dossierComplet = parts.slice(0, depth + 1).join('/');
+      //       if (!folderToFiles[dossierComplet]) folderToFiles[dossierComplet] = [];
+      //       folderToFiles[dossierComplet].push(node.id);
+      //       if (folderToFiles[dossierComplet].length > 1 && folderToFiles[dossierComplet].length <= 30 && !dossierCommun) {
+      //         dossierCommun = dossierComplet;
+      //       }
+      //       if (folderToFiles[dossierComplet].length > 30) break;
+      //     }
+      //     node.dossierCommun = dossierCommun;
+      //   });
+
+                      // // Crée les liens uniquement pour les dossiers qui ne sont pas trop larges
+                      // const filteredLinks = [];
+                      //       Object.values(folderToFiles).forEach(fileList => {
+                      //         if (fileList.length > 1 && fileList.length <= 50) {
+                      //           for (let i = 0; i < fileList.length; i++) {
+                      //             for (let j = i + 1; j < fileList.length; j++) {
+                      //               filteredLinks.push({ source: fileList[i], target: fileList[j] });
+                      //             }
+                      //           }
+                      //         }
+                      //       });
+
+
+//           nodes = [...filteredNodes]; // Remplace const nodes par nodes =
+//           links = [];
+//           const folderNodes = {};
+
+//           Object.entries(folderToFiles).forEach(([dossier, fileList]) => {
+//             if (fileList.length > 10) { // seuil à adapter
+//               // Crée un node dossier si pas déjà fait
+//               if (!folderNodes[dossier]) {
+//                 folderNodes[dossier] = {
+//                   id: `folder_${dossier}`,
+//                   label: dossier.split('/').pop(),
+//                   type: 'folder',
+//                   size: Math.min(10 + fileList.length / 5, 30)
+//                 };
+//                 nodes.push(folderNodes[dossier]);
+//               }
+//               // Relie chaque fichier au node dossier
+//               fileList.forEach(fileId => {
+//                 links.push({ source: fileId, target: folderNodes[dossier].id });
+//               });
+//             } else if (fileList.length > 1) {
+//               // Relie les fichiers entre eux (petits dossiers)
+//               for (let i = 0; i < fileList.length; i++) {
+//                 for (let j = i + 1; j < fileList.length; j++) {
+//                   links.push({ source: fileList[i], target: fileList[j] });
+//                 }
+//               }
+//             }
+//           });
+      
+
+//   console.log(`Affichage de ${filteredNodes.length} nœuds sur ${fullGraph.nodes.length}`);
+
+//   //graph.graphData({ nodes: filteredNodes, links: filteredLinks });
+//   graph.graphData({ nodes, links });
+//   applyYearForces();
+// }
+
+//             function simplifyPath(path) {
+//                     // Si "Desktop" est présent, on commence après
+//               const desktopIdx = path.indexOf('Desktop');
+//               if (desktopIdx !== -1) {
+//                 path = path.substring(desktopIdx + 'Desktop'.length);
+//               }
+//               return path
+//                 .split('/') // Sépare chaque dossier/fichier
+//                 .map(part => part
+//                   .replace(/^\d+_/, '') // Enlève les préfixes numériques suivis de _
+//                   .replace(/[^a-zA-Z ]/g, '') // Garde seulement lettres et espaces
+//                   .trim()
+//                 )
+//                 .filter(part => part.length > 0) // Enlève les morceaux vides
+//                 .join(' / ');
+// }
+
+
+//     const tooltip = document.getElementById('node-tooltip');
+//     // Affiche le tooltip à côté de la souris
+// elem.addEventListener('mousemove', e => {
+//   tooltip.style.left = (e.clientX + 15) + 'px';
+//   tooltip.style.top = (e.clientY + 15) + 'px';
+// });
+    // let typeWriterTimeout = null;
+
+    //     function typeWriter(text, callback) {
+    //         if (typeWriterTimeout) clearTimeout(typeWriterTimeout); // Annule l'animation précédente
+    //         tooltip.innerHTML = '';
+    //         let i = 0;
+    //         function write() {
+    //           if (i < text.length) {
+    //             let nextChar = text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+    //             tooltip.innerHTML += nextChar;
+    //             i++;
+    //             typeWriterTimeout = setTimeout(write, 15);
+    //           } else if (callback) {
+    //             callback();
+    //           }
+    //         }
+    //         write();
+    //       }
+
+//           // Regroupe les nœuds par année de création
+// nodes.forEach(node => {
+//   const dateStr = node.attributes?.["Date de Creation"];
+//   // Récupère l'année, ou "inconnue" si absent
+//   node.group = dateStr ? dateStr.slice(0, 4) : "inconnue";
+// });
+
+
+//      function applyYearForces() {
+//   if (!graph) return; // Sécurité si graph n'est pas encore créé
+//   const years = [...new Set(nodes.map(n => n.group))];
+//   graph
+//     .d3Force('x', d3.forceX(node => {
+//       const idx = years.indexOf(node.group);
+//       return idx * 200;
+//     }))
+//     .d3Force('center', d3.forceCenter(0, 0, 0))
+//     .d3Force('charge').strength(-120)
+//     .d3Force('link').distance(60);
+// }
+// const years = [...new Set(nodes.map(n => n.group))];
+
+
+//   function updateSliderValuePosition() {
+//   const slider = document.getElementById('dataRange');
+//   const sliderValue = document.getElementById('sliderValue');
+//   const min = Number(slider.min);
+//   const max = Number(slider.max);
+//   const val = Number(slider.value);
+
+//   // Calcule la position du curseur en pourcentage
+//   const percent = (val - min) / (max - min);
+
+//   // Largeur du slider
+//   const sliderWidth = slider.offsetWidth;
+
+//   // Décalage horizontal pour centrer le texte sur le curseur
+//   const offset = percent * sliderWidth - sliderValue.offsetWidth / 2;
+
+//   sliderValue.style.left = `${offset}px`;
+// }
+
+// // Mets à jour la position à chaque changement
+// const slider = document.getElementById('dataRange');
+// const sliderValue = document.getElementById('sliderValue');
+
+// slider.addEventListener('input', e => {
+//   sliderValue.textContent = `${e.target.value}%`;
+//   updateGraph();
+//   updateSliderValuePosition();
+// });
+// window.addEventListener('resize', updateSliderValuePosition);
+// sliderValue.textContent = `${slider.value}%`;
+// updateSliderValuePosition();
+
+//       // Ajoute ce bloc après l'initialisation du graph
+// elem.addEventListener('mousedown', () => {
+//   if (autoOrbit) {
+//     stopOrbit();
+//     toggleSwitch.classList.add('active'); // met à jour le toggle visuellement
+//   }
+// });
+// elem.addEventListener('wheel', () => {
+//   if (autoOrbit) {
+//     stopOrbit();
+//     toggleSwitch.classList.add('active');
+//   }
+// });
+// elem.addEventListener('touchstart', () => {
+//   if (autoOrbit) {
+//     stopOrbit();
+//     toggleSwitch.classList.add('active');
+//   }
+// });
+
+      
+// let autoOrbit = true;
+// const orbitRadius = 2000;
+// let angle = 0;
+// let orbitAnimId = null;
+
+// function startOrbit() {
+//   autoOrbit = true;
+
+//   // Récupère la position actuelle de la caméra à chaque activation
+//   const camPos = graph.cameraPosition();
+//   // Calcule l'angle de départ à partir de la position x/z
+//   angle = Math.atan2(camPos.x, camPos.z);
+//   // Calcule le rayon actuel (distance au centre)
+//   let currentRadius = Math.sqrt(camPos.x * camPos.x + camPos.z * camPos.z);
+
+//   function animateOrbit() {
+//     angle += 0.002;
+//     const x = currentRadius * Math.sin(angle);
+//     const z = currentRadius * Math.cos(angle);
+//     graph.cameraPosition({ x, y: camPos.y, z }, { x: 0, y: 0, z: 0 });
+//     orbitAnimId = requestAnimationFrame(animateOrbit);
+//   }
+//   animateOrbit();
+//   graph.controls().enabled = false;
+// }
+
+// function stopOrbit() {
+//   autoOrbit = false;
+//   if (orbitAnimId) cancelAnimationFrame(orbitAnimId);
+//   graph.controls().enabled = true;
+//   // Ne touche pas à la caméra ici !
+// }
+// // Démarre en mode rotation auto
+
+
+
+// const toggleSwitch = document.getElementById('toggleSwitch');
+// toggleSwitch.addEventListener('click', () => {
+//   toggleSwitch.classList.toggle('active');
+//   if (toggleSwitch.classList.contains('active')) {
+//     stopOrbit();
+//   } else {
+//     startOrbit();
+//   }
+// });
+
+
+
+// slider.addEventListener('input', e => {
+//   sliderValue.textContent = `${e.target.value}%`;
+//   updateGraph();
+// });
+// sliderValue.textContent = `${slider.value}%`;
+
+
+
+
+//   </script>
+
+  
+
+// </body>
+
+// </html>
