@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
+import { resolve } from 'path'
 
 export default defineConfig({
   root: './docs',
   base: '/graphdata/',
-  ////publicDir: '../public', // Pointe vers le dossier public à la racine
   build: {
-    outDir: './dist',
+    outDir: resolve(__dirname, 'docs/dist'),
     emptyOutDir: true
   }
 })
