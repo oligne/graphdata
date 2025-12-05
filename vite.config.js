@@ -5,7 +5,7 @@ export default defineConfig({
   base: '/graphdata/',
   ////publicDir: '../public', // Pointe vers le dossier public à la racine
   build: {
-    outDir: '../dist',
+    outDir: './dist',
     emptyOutDir: true
   }
 })
